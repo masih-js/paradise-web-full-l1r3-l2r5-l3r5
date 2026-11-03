@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Paradise Web Full L1r3 L2r5 L3r5</title>
+<style>
+:root{--night:#121318;--panel:#1b1c23;--line:#34343f;--ivory:#efe8db;--muted:#a59f93;--gold:#d8b46a;--ink:#1a160d;--err:#f0a08a;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--night);color:var(--ivory);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0}
+#unity-canvas{width:100%;height:100%;display:block;background:var(--night);outline:none}
+#gate{position:fixed;inset:0;display:grid;place-items:center;padding:24px 16px;background:radial-gradient(120% 90% at 50% 10%,#23232c 0%,var(--night) 70%)}
+.card{width:min(520px,100%);display:grid;gap:20px}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+h1{font:400 clamp(32px,7vw,48px)/1.05 Georgia,serif;margin:0}
+p{margin:0;color:var(--muted)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0}
+.keys dt{display:flex;gap:4px}.keys dd{margin:0}
+kbd{font:600 12px system-ui;min-width:24px;padding:3px 7px;text-align:center;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--panel)}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.status{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+button{font:600 15px system-ui;padding:12px 22px;border-radius:999px;border:0;background:var(--gold);color:var(--ink);cursor:pointer;justify-self:start}
+button:disabled{opacity:.45;cursor:default}
+.err{color:var(--err)}.note{font-size:12px}
+[hidden]{display:none!important}
+</style></head><body>
+<div id="stage"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+<div id="gate"><div class="card">
+<div class="eyebrow">Web build · same scene as Quest APK L1r3 · L2r5 · L3r5</div>
+<h1>Paradise <span style="color:var(--gold)">Full</span></h1>
+<p>L1 r3 · L2 r5 u12 · L3 r5 u9, with the production entrance, garden, Main Hall and corridors. Baked light is 2048&nbsp;px here (4096 on Quest), so close-up shadows are a little softer.</p>
+<dl class="keys">
+<dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Walk</dd>
+<dt><kbd>Mouse</kbd></dt><dd>Look around (click the view first)</dd>
+<dt><kbd>Shift</kbd></dt><dd>Run</dd>
+<dt><kbd>E</kbd></dt><dd>Sit / stand</dd>
+<dt><kbd>R</kbd></dt><dd>Jump to the Dr. Hall entrance</dd>
+<dt><kbd>Esc</kbd></dt><dd>Free the mouse</dd>
+</dl>
+<div class="bar"><i id="fill"></i></div>
+<div class="status"><span id="what">Preparing</span><span id="pct">0%</span></div>
+<button id="go" disabled>Enter Paradise</button>
+<p class="note">Desktop Chrome, Edge or Safari with 8&nbsp;GB+ RAM. About 536&nbsp;MB download. Phones are not supported.</p>
+</div></div>
+<script src="Build/Paradise_Web_Full_L1r3_L2r5_L3r5.loader.js"></script>
+<script>
+(function(){
+  var B='Build/', V='?v=1', N=38, SIZES=[14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,14000000,9845390];
+  var PARTS=[];for(var i=0;i<N;i++)PARTS.push('data_'+(i<10?'0':'')+i+'.bin');
+  var total=SIZES.reduce(function(a,b){return a+b},0);
+  var got=new Array(N).fill(0),fill=document.getElementById('fill'),what=document.getElementById('what'),pct=document.getElementById('pct'),go=document.getElementById('go');
+  function mb(b){return (b/1e6).toFixed(0)}
+  function show(){var s=got.reduce(function(a,b){return a+b},0),f=Math.min(1,s/total);fill.style.width=(f*90).toFixed(1)+'%';pct.textContent=Math.round(f*90)+'%';what.textContent='Downloading '+mb(s)+' of '+mb(total)+' MB';}
+  function fail(m){what.textContent=String(m);what.className='err';pct.textContent='';}
+  function getPart(url,i){return fetch(url).then(function(r){
+    if(!r.ok)throw new Error(url+' '+r.status);
+    if(!r.body||!r.body.getReader)return r.arrayBuffer().then(function(b){got[i]=b.byteLength;show();return new Uint8Array(b);});
+    var rd=r.body.getReader(),buf=new Uint8Array(SIZES[i]),off=0;
+    return (function pump(){return rd.read().then(function(x){if(x.done)return buf;buf.set(x.value,off);off+=x.value.byteLength;got[i]=off;show();return pump();});})();
+  });}
+  // Fetch parts 4 at a time
+  var out=new Array(N),next=0;
+  function worker(){if(next>=N)return Promise.resolve();var i=next++;return getPart(B+PARTS[i]+V,i).then(function(b){out[i]=b;return worker();});}
+  show();
+  Promise.all([worker(),worker(),worker(),worker()]).then(function(){
+    // Serve the reassembled data to the Unity loader from memory (no blob URL): virtual URL handled by a fetch shim
+    var dataUrl=B+'paradise-data.unityweb', realFetch=window.fetch.bind(window);
+    window.fetch=function(u,o){
+      if(typeof u==='string'&&u.indexOf('paradise-data.unityweb')>=0&&out){
+        var parts=out,k=0;out=null;
+        var stream=new ReadableStream({pull:function(c){if(k<parts.length){c.enqueue(parts[k]);parts[k++]=null;}else c.close();}});
+        return Promise.resolve(new Response(stream,{status:200,headers:{'Content-Type':'application/octet-stream','Content-Length':String(total)}}));
+      }
+      return realFetch(u,o);
+    };
+    what.textContent='Downloaded. Ready to enter.';fill.style.width='90%';pct.textContent='90%';
+    go.disabled=false;go.focus();
+    go.onclick=function(){
+      go.disabled=true;what.textContent='Starting the world';
+      var canvas=document.getElementById('unity-canvas');
+      createUnityInstance(canvas,{dataUrl:dataUrl,frameworkUrl:B+'Paradise_Web_Full_L1r3_L2r5_L3r5.framework.js.unityweb'+V,codeUrl:B+'Paradise_Web_Full_L1r3_L2r5_L3r5.wasm.unityweb'+V,
+        streamingAssetsUrl:'StreamingAssets',companyName:'Capitalino',productName:'Paradise',productVersion:'1.0',cacheControl:function(){return 'no-store'},
+        showBanner:function(m,t){if(t==='error')fail(m);else console.warn(m);}},
+        function(p){var f=0.9+0.1*p;fill.style.width=(f*100).toFixed(1)+'%';pct.textContent=Math.round(f*100)+'%';}
+      ).then(function(){document.getElementById('gate').hidden=true;canvas.focus();}).catch(fail);
+    };
+  }).catch(function(e){fail('Download failed: '+e.message+'. Reload the page to try again.');});
+})();
+</script>
+</body></html>
